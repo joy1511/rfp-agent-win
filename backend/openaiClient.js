@@ -12,6 +12,7 @@ const openai = new OpenAI({
  * @returns {Promise<number>} A number between 0 and 100 representing match percentage
  */
 async function getSpecMatchPercentage(rfpText, productSpecs) {
+  console.log("🧠 OpenAI SPEC MATCH CALLED");
   try {
     if (!process.env.OPENAI_API_KEY) {
       console.warn('OPENAI_API_KEY not set, returning default match percentage');
