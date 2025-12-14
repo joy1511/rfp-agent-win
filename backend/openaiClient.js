@@ -37,7 +37,7 @@ Evaluate how well the product specification matches the RFP requirement. Conside
 Respond with ONLY a single number between 0 and 100 representing the match percentage. Do not include any explanation, just the number.`;
 
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash',
+      model: 'gemini-1.5-flash-latest',
       generationConfig: {
         temperature: 0.3,
         maxOutputTokens: 10,
