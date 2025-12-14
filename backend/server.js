@@ -136,20 +136,20 @@ app.get('/api/rfps', (req, res) => {
   res.json(rfps);
 });
 
-// Helper function to call OpenAI with timeout and fallback
+// Helper function to call Gemini with timeout and fallback
 async function getMatchScoreWithFallback(rfpRequirement, productSpecs, fallbackValue, productName) {
   try {
-    // Call OpenAI to compute spec match percentage
+    // Call Gemini to compute spec match percentage
     const matchScore = await Promise.race([
       getSpecMatchPercentage(rfpRequirement, productSpecs),
       new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('OpenAI request timeout')), 30000)
+        setTimeout(() => reject(new Error('Gemini request timeout')), 30000)
       )
     ]);
     console.log(`✓ AI match calculated for ${productName}: ${matchScore}%`);
     return matchScore;
   } catch (error) {
-    console.error(`✗ OpenAI failed for ${productName}, using fallback ${fallbackValue}%:`, error.message);
+    console.error(`✗ Gemini failed for ${productName}, using fallback ${fallbackValue}%:`, error.message);
     return fallbackValue;
   }
 }

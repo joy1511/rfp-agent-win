@@ -1,9 +1,9 @@
-const OpenAI = require('openai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Initialize Gemini client
+const genAI = process.env.GEMINI_API_KEY 
+  ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+  : null;
 
 /**
  * Calculates specification match percentage between RFP text and product specifications
@@ -12,10 +12,10 @@ const openai = new OpenAI({
  * @returns {Promise<number>} A number between 0 and 100 representing match percentage
  */
 async function getSpecMatchPercentage(rfpText, productSpecs) {
-  console.log("🧠 OpenAI SPEC MATCH CALLED");
+  console.log("🧠 Gemini spec match called");
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      console.warn('OPENAI_API_KEY not set, returning default match percentage');
+    if (!process.env.GEMINI_API_KEY || !genAI) {
+      console.warn('GEMINI_API_KEY not set, returning default match percentage');
       return 85; // Default fallback value
     }
 
@@ -36,23 +36,19 @@ Evaluate how well the product specification matches the RFP requirement. Conside
 
 Respond with ONLY a single number between 0 and 100 representing the match percentage. Do not include any explanation, just the number.`;
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a technical evaluation expert. Respond with only a number between 0 and 100.',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      temperature: 0.3,
-      max_tokens: 10,
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-flash',
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 10,
+      },
     });
 
-    const matchPercentage = parseFloat(response.choices[0]?.message?.content?.trim() || '0');
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text().trim();
+    
+    const matchPercentage = parseFloat(text || '0');
     
     // Ensure the result is between 0 and 100
     const clampedPercentage = Math.max(0, Math.min(100, matchPercentage));
