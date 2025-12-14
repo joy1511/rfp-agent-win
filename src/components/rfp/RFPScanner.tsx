@@ -1,37 +1,14 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, ExternalLink, Play } from "lucide-react";
+import { getRFPs, type RFP } from "@/lib/api";
 
-const mockRFPs = [
-  {
-    id: 1,
-    title: 'Industrial Equipment Supply - Metro Rail Project',
-    source: 'gov-procurement.com',
-    dueDate: '2025-02-15',
-    daysLeft: 28,
-    status: 'new',
-    value: '$2.5M',
-  },
-  {
-    id: 2,
-    title: 'Smart Manufacturing Solutions RFP',
-    source: 'enterprise-bids.net',
-    dueDate: '2025-02-28',
-    daysLeft: 41,
-    status: 'reviewed',
-    value: '$1.8M',
-  },
-  {
-    id: 3,
-    title: 'Telecommunications Infrastructure Upgrade',
-    source: 'telecom-rfps.io',
-    dueDate: '2025-03-10',
-    daysLeft: 51,
-    status: 'selected',
-    value: '$3.2M',
-  },
-];
+interface RFPWithStatus extends RFP {
+  status: 'new' | 'reviewed' | 'selected';
+  value: string;
+}
 
 const statusColors = {
   new: 'bg-primary',
@@ -39,7 +16,77 @@ const statusColors = {
   selected: 'bg-success',
 };
 
-const RFPScanner = () => {
+interface RFPScannerProps {
+  onRFPProcessed?: () => void;
+}
+
+const RFPScanner = ({ onRFPProcessed }: RFPScannerProps) => {
+  const [rfps, setRfps] = useState<RFPWithStatus[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRFPs = async () => {
+      try {
+        const data = await getRFPs();
+        // Map backend data to include status and value for UI
+        const rfpsWithStatus: RFPWithStatus[] = data.map((rfp, index) => ({
+          ...rfp,
+          status: index === 0 ? 'new' : index === 1 ? 'reviewed' : 'selected' as 'new' | 'reviewed' | 'selected',
+          value: index === 0 ? '$2.5M' : index === 1 ? '$1.8M' : '$3.2M',
+        }));
+        setRfps(rfpsWithStatus);
+      } catch (error) {
+        console.error('Failed to fetch RFPs:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRFPs();
+  }, []);
+
+  const handleProcessRFP = async (rfpId: number) => {
+    try {
+      // Fetch RFP details from backend
+      const data = await getRFPs();
+      const rfpDetails = data.find(rfp => rfp.id === rfpId);
+      
+      if (rfpDetails) {
+        // Mark RFP as selected in UI
+        setRfps(prevRfps => 
+          prevRfps.map(rfp => 
+            rfp.id === rfpId ? { ...rfp, status: 'selected' as const } : rfp
+          )
+        );
+        
+        // Trigger workflow progression (Main Agent orchestration)
+        if (onRFPProcessed) {
+          onRFPProcessed();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to process RFP:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-foreground">RFP Scanner</h2>
+            <p className="text-muted-foreground">Opportunities identified for next 90 days</p>
+          </div>
+          <Button className="gap-2 bg-gradient-primary shadow-glow">
+            <Play className="h-4 w-4" />
+            Start New Scan
+          </Button>
+        </div>
+        <div className="text-center py-8 text-muted-foreground">Loading RFPs...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -54,13 +101,13 @@ const RFPScanner = () => {
       </div>
 
       <div className="grid gap-4">
-        {mockRFPs.map((rfp) => (
+        {rfps.map((rfp) => (
           <Card key={rfp.id} className="shadow-medium transition-all hover:shadow-glow">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <Badge className={`${statusColors[rfp.status as keyof typeof statusColors]} text-xs`}>
+                    <Badge className={`${statusColors[rfp.status]} text-xs`}>
                       {rfp.status}
                     </Badge>
                     <Badge variant="outline" className="text-xs">{rfp.value}</Badge>
@@ -82,7 +129,11 @@ const RFPScanner = () => {
                     {rfp.daysLeft} days left
                   </Badge>
                 </div>
-                <Button variant="default" size="sm">
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  onClick={() => handleProcessRFP(rfp.id)}
+                >
                   Process RFP
                 </Button>
               </div>

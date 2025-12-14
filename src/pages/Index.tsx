@@ -8,10 +8,34 @@ import WorkflowTimeline from "@/components/workflow/WorkflowTimeline";
 
 const Index = () => {
   const [activeView, setActiveView] = useState<'overview' | 'rfp' | 'products' | 'pricing'>('overview');
+  const [workflowInProgress, setWorkflowInProgress] = useState(false);
+
+  // Handle workflow progression after RFP is processed
+  const handleRFPProcessed = () => {
+    setWorkflowInProgress(true);
+    
+    // Step 1: Show Product Matching after RFP is processed (simulate processing time)
+    setTimeout(() => {
+      setActiveView('products');
+      
+      // Step 2: Show Pricing Summary after Product Matching (simulate analysis time)
+      setTimeout(() => {
+        setActiveView('pricing');
+        setWorkflowInProgress(false);
+      }, 2000); // 2 seconds delay for product matching
+    }, 1000); // 1 second delay for RFP processing
+  };
+
+  // Allow manual view changes only when workflow is not in progress
+  const handleViewChange = (view: 'overview' | 'rfp' | 'products' | 'pricing') => {
+    if (!workflowInProgress) {
+      setActiveView(view);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader activeView={activeView} onViewChange={setActiveView} />
+      <DashboardHeader activeView={activeView} onViewChange={handleViewChange} />
       
       <main className="container mx-auto px-6 py-8">
         {activeView === 'overview' && (
@@ -23,7 +47,7 @@ const Index = () => {
           </div>
         )}
 
-        {activeView === 'rfp' && <RFPScanner />}
+        {activeView === 'rfp' && <RFPScanner onRFPProcessed={handleRFPProcessed} />}
         {activeView === 'products' && <ProductMatching />}
         {activeView === 'pricing' && <PricingSummary />}
       </main>

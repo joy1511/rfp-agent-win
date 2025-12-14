@@ -1,39 +1,47 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, TrendingUp } from "lucide-react";
-
-const mockProducts = [
-  {
-    rfpItem: 'Industrial Grade Router',
-    topMatch: 'Cisco ISR 4451',
-    matchScore: 94,
-    alternatives: [
-      { name: 'Juniper MX204', score: 89 },
-      { name: 'HPE FlexNetwork', score: 85 },
-    ],
-  },
-  {
-    rfpItem: 'Network Switch 48-Port',
-    topMatch: 'Cisco Catalyst 9300',
-    matchScore: 96,
-    alternatives: [
-      { name: 'Arista 7050X', score: 91 },
-      { name: 'Dell PowerSwitch', score: 87 },
-    ],
-  },
-  {
-    rfpItem: 'Firewall Appliance',
-    topMatch: 'Palo Alto PA-5220',
-    matchScore: 92,
-    alternatives: [
-      { name: 'Fortinet FortiGate 600E', score: 88 },
-      { name: 'Check Point 6400', score: 84 },
-    ],
-  },
-];
+import { getProductMatching, type ProductMatch } from "@/lib/api";
 
 const ProductMatching = () => {
+  const [products, setProducts] = useState<ProductMatch[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getProductMatching();
+        setProducts(data);
+      } catch (error) {
+        console.error('Failed to fetch product matching:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-foreground">Product Matching</h2>
+            <p className="text-muted-foreground">AI-powered OEM product recommendations</p>
+          </div>
+          <Badge className="gap-1 bg-gradient-success text-base px-4 py-2">
+            <CheckCircle2 className="h-4 w-4" />
+            Analysis Complete
+          </Badge>
+        </div>
+        <div className="text-center py-8 text-muted-foreground">Loading product matches...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -48,7 +56,7 @@ const ProductMatching = () => {
       </div>
 
       <div className="grid gap-6">
-        {mockProducts.map((product, index) => (
+        {products.map((product, index) => (
           <Card key={index} className="shadow-medium">
             <CardHeader>
               <div className="flex items-start justify-between">
