@@ -1,9 +1,26 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+// Lazily-loaded Gemini client so this works in CommonJS without ESM import issues
+let genAI = null;
 
-// Initialize Gemini client
-const genAI = process.env.GEMINI_API_KEY 
-  ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  : null;
+async function getGeminiModel() {
+  if (!process.env.GEMINI_API_KEY) {
+    return null;
+  }
+
+  if (!genAI) {
+    // Use dynamic import because @google/generative-ai is ESM-only
+    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  }
+
+  // Use a lightweight, fast model for numeric scoring
+  return genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    generationConfig: {
+      temperature: 0.3,
+      maxOutputTokens: 10,
+    },
+  });
+}
 
 /**
  * Calculates specification match percentage between RFP text and product specifications
@@ -14,7 +31,9 @@ const genAI = process.env.GEMINI_API_KEY
 async function getSpecMatchPercentage(rfpText, productSpecs) {
   console.log("🧠 Gemini spec match called");
   try {
-    if (!process.env.GEMINI_API_KEY || !genAI) {
+    const model = await getGeminiModel();
+
+    if (!model) {
       console.warn('GEMINI_API_KEY not set, returning default match percentage');
       return 85; // Default fallback value
     }
@@ -35,14 +54,6 @@ Evaluate how well the product specification matches the RFP requirement. Conside
 - Overall fit
 
 Respond with ONLY a single number between 0 and 100 representing the match percentage. Do not include any explanation, just the number.`;
-
-    const model = genAI.getGenerativeModel({ 
-      model: "models/gemini-pro",
-      generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 10,
-      },
-    });
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
