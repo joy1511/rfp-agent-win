@@ -74,6 +74,6 @@ AI Layer: Mock-first LLM integration (OpenAI-ready)
 - Reduces RFP response time from days to minutes
 - Improves consistency and accuracy
 - Demonstrates scalable, enterprise-grade agentic AI architecture
-- 
+
 **This repository focuses on architecture, agent orchestration, and AI integration patterns.
 The mock-first AI approach ensures reliability while remaining fully production-ready.**
