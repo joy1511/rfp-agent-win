@@ -50,7 +50,7 @@ This mirrors real-world enterprise systems where AI services may be rate-limited
 
 ---
 
-## 🔐Environment Configuration
+## Environment Configuration
 
 AI behavior is controlled using environment variables:
 
