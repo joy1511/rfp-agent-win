@@ -112,6 +112,17 @@ const productMatchingData = [
   },
 ];
 
+// In-memory cache for product matching results, keyed by a simple session identifier.
+// This keeps spec match values stable for a given requester without changing the API.
+const productMatchingCache = new Map();
+
+function getProductMatchingCacheKey(req) {
+  // Approximate a "session" without frontend changes by using IP + user agent.
+  const ip = req.ip || req.headers["x-forwarded-for"] || "unknown-ip";
+  const ua = req.headers["user-agent"] || "unknown-ua";
+  return `${ip}::${ua}`;
+}
+
 // Dummy Pricing Summary data
 const pricingSummary = {
   materialsBreakdown: [
@@ -155,12 +166,20 @@ async function getMatchScoreWithFallback(rfpRequirement, productSpecs, fallbackV
 }
 
 app.get('/api/product-matching', async (req, res) => {
+  const cacheKey = getProductMatchingCacheKey(req);
+
+  // 1) Return cached results if available, so values stay stable for this requester/session.
+  if (productMatchingCache.has(cacheKey)) {
+    console.log('📊 Product Matching API called - returning cached results for session:', cacheKey);
+    return res.json(productMatchingCache.get(cacheKey));
+  }
+
   console.log('📊 Product Matching API called - computing spec match percentages with AI...');
   
   try {
     const productMatching = await Promise.all(
       productMatchingData.map(async (item) => {
-        // Calculate match score for top match using AI
+        // Calculate match score for top match using AI (or mock, depending on mode)
         const topMatchScore = await getMatchScoreWithFallback(
           item.rfpRequirement,
           item.topMatchSpecs,
@@ -168,7 +187,7 @@ app.get('/api/product-matching', async (req, res) => {
           item.topMatch
         );
 
-        // Calculate match scores for alternatives using AI
+        // Calculate match scores for alternatives using AI / mock
         const alternatives = await Promise.all(
           item.alternatives.map(async (alt) => {
             const altScore = await getMatchScoreWithFallback(
@@ -193,7 +212,8 @@ app.get('/api/product-matching', async (req, res) => {
       })
     );
 
-    console.log('✅ Product Matching API response ready');
+    console.log('✅ Product Matching API response ready, caching for session:', cacheKey);
+    productMatchingCache.set(cacheKey, productMatching);
     res.json(productMatching);
   } catch (error) {
     console.error('❌ Critical error in /api/product-matching:', error);
@@ -207,6 +227,9 @@ app.get('/api/product-matching', async (req, res) => {
         score: alt.fallbackScore,
       })),
     }));
+
+    console.log('✅ Returning fallback product matching and caching for session:', cacheKey);
+    productMatchingCache.set(cacheKey, fallbackProductMatching);
     res.json(fallbackProductMatching);
   }
 });
