@@ -1,73 +1,79 @@
-# Welcome to your Lovable project
+#  RFP Agentic AI System
 
-## Project info
+## Overview
+This project is an **agentic AI system** designed to automate enterprise RFP (Request for Proposal) analysis.  
+It replaces manual RFP review with a structured, multi-agent workflow that evaluates requirements, matches products, and supports proposal creation.
 
-**URL**: https://lovable.dev/projects/9f075d01-1835-4aeb-b831-8a9520bceeb8
+---
 
-## How can I edit this code?
+##  Key Features
+- Automated RFP processing
+- Agent-based orchestration (Sales, Technical, Pricing)
+- AI-powered (mock-first) specification matching
+- Stable, reproducible results for demos
+- Production-ready AI integration with safe fallback
+- Secure backend and deployment architecture
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+##  Agentic Architecture
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/9f075d01-1835-4aeb-b831-8a9520bceeb8) and start prompting.
+### Sales Agent
+- Ingests and processes incoming RFPs
+- Extracts high-level requirements
 
-Changes made via Lovable will be committed automatically to this repo.
+### Technical Agent
+- Evaluates RFP requirements against OEM product specifications
+- Computes a **spec-match percentage** using an AI reasoning layer
 
-**Use your preferred IDE**
+### Pricing Agent
+- Prepares pricing-ready outputs for proposals
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Each agent operates independently and communicates via APIs, enabling modular and scalable design.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+##  AI Integration Strategy
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+The Technical Agent includes an AI reasoning layer for specification matching.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Mock Mode (Default)
+- Deterministic AI-like reasoning
+- Stable and reproducible results for demos
+- No external API dependency
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Real Mode (Production-Ready)
+- Supports live LLM integration (e.g., OpenAI)
+- Can be enabled via environment variables without code changes
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+This mirrors real-world enterprise systems where AI services may be rate-limited or unavailable.
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🔐Environment Configuration
 
-**Use GitHub Codespaces**
+AI behavior is controlled using environment variables:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+.env
+AI_MODE = MOCK
 
-## What technologies are used for this project?
+To enable live AI in production:
 
-This project is built with:
+AI_MODE=REAL
+OPENAI_API_KEY=api_key_here
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+**Tech Stack**
 
-## How can I deploy this project?
+Frontend: React (Vite)
+Backend: Node.js, Express
+Deployment: Render / Vercel
+AI Layer: Mock-first LLM integration (OpenAI-ready)
 
-Simply open [Lovable](https://lovable.dev/projects/9f075d01-1835-4aeb-b831-8a9520bceeb8) and click on Share -> Publish.
+**Why This Matters**
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- Reduces RFP response time from days to minutes
+- Improves consistency and accuracy
+- Demonstrates scalable, enterprise-grade agentic AI architecture
+- 
+**This repository focuses on architecture, agent orchestration, and AI integration patterns.
+The mock-first AI approach ensures reliability while remaining fully production-ready.**
