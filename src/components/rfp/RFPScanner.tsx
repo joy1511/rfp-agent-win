@@ -77,7 +77,9 @@ const RFPScanner = ({ onRFPProcessed }: RFPScannerProps) => {
             <h2 className="text-3xl font-bold text-foreground">RFP Scanner</h2>
             <p className="text-muted-foreground">Opportunities identified for next 90 days</p>
           </div>
-          <Button className="gap-2 bg-gradient-primary shadow-glow">
+          <Button 
+            className="gap-2 bg-gradient-primary shadow-glow"
+            onClick={() => alert( "Feature coming soon")}>
             <Play className="h-4 w-4" />
             Start New Scan
           </Button>
