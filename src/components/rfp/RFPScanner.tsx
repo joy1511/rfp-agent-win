@@ -79,7 +79,8 @@ const RFPScanner = ({ onRFPProcessed }: RFPScannerProps) => {
           </div>
           <Button 
             className="gap-2 bg-gradient-primary shadow-glow"
-            onClick={() => alert( "Feature coming soon")}>
+            onClick={() => alert( "Feature coming soon")}
+          >
             <Play className="h-4 w-4" />
             Start New Scan
           </Button>
