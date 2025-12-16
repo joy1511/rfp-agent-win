@@ -53,7 +53,10 @@ const PricingSummary = () => {
             <h2 className="text-3xl font-bold text-foreground">Pricing Summary</h2>
             <p className="text-muted-foreground">Complete cost breakdown for RFP response</p>
           </div>
-          <Button className="gap-2 bg-gradient-primary shadow-glow">
+          <Button 
+            className="gap-2 bg-gradient-primary shadow-glow"
+            onClick={() => alert("Feature coming soon")}
+          >
             <Download className="h-4 w-4" />
             Export Proposal
           </Button>
@@ -70,7 +73,10 @@ const PricingSummary = () => {
           <h2 className="text-3xl font-bold text-foreground">Pricing Summary</h2>
           <p className="text-muted-foreground">Complete cost breakdown for RFP response</p>
         </div>
-        <Button className="gap-2 bg-gradient-primary shadow-glow">
+        <Button 
+          className="gap-2 bg-gradient-primary shadow-glow"
+          onClick={() => alert("Feature coming soon")}
+        >
           <Download className="h-4 w-4" />
           Export Proposal
         </Button>
